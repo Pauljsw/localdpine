@@ -1,0 +1,14 @@
+data:
+  class_path: timeprophet.data_modules.ASOSDataModule
+  init_args:
+    dataset_path: dataset/asos_time_split_30_7.csv.gz
+    batch_size: 16
+    input_len: 30
+    output_len: 7
+    x_features: null
+    y_features: null
+    all_features_num: 402
+    preprocessor: sklearn.preprocessing.StandardScaler
+    pin_memory: true
+    num_workers: 4
+    persistent_workers: true

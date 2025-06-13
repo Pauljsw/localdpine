@@ -1,0 +1,58 @@
+model:
+  class_path: timeprophet.experiments.forecasting.LongTermForecasting
+  init_args:
+    model:
+      class_path: timeprophet.models.DiPE
+      init_args:
+        use_revin: True
+        use_time_w: True
+        use_freq_w: True
+        num_experts: 4
+        individual_f: True
+        individual_t: True
+        individual_c: False
+        loss_alpha: 0.7
+        t_loss: 'mae'
+    log_forecast: True
+
+optimizer:
+  class_path: torch.optim.AdamW
+  init_args:
+    lr: 2e-4
+    weight_decay: 1e-3
+
+lr_scheduler:
+  class_path: torch.optim.lr_scheduler.CosineAnnealingLR
+  init_args:
+    T_max: 50
+    eta_min: 1e-6
+
+trainer:
+  max_epochs: 200
+  precision: 32
+  gradient_clip_val: 1.0
+  logger:
+    - class_path: timeprophet.logger.TensorBoardLogger
+      init_args:
+        save_dir: logs
+  callbacks:
+    - class_path: timeprophet.utils.callbacks.TemperatureScaling
+      init_args:
+        verbose: True
+    - class_path: pytorch_lightning.callbacks.EarlyStopping
+      init_args:
+        monitor: val_loss
+        patience: 30
+        min_delta: 1e-6
+        mode: min
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: val_loss
+        save_top_k: 3
+        mode: min
+        save_last: True
+        filename: 'time-split-{epoch:02d}-{val_loss:.4f}'
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+  log_every_n_steps: 20
